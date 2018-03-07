@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	SDL_Rect ship = { 200, 300, 50, 50 };
 	SDL_Rect shot = { ship.x + 30, ship.y + 20, 20, 10 };
 	int speedx = 0, speedy = 0, speed = 0;
-	bool space = false;
+	bool left = false, right = false, up = false, down = false, space = false;
 
 	bool isRunning = true;
 	SDL_Event event;
@@ -25,50 +25,74 @@ int main(int argc, char* argv[]) {
 			else if (event.type == SDL_KEYDOWN) {
 				switch (event.key.keysym.sym){
 				case SDLK_LEFT:
-					speedx = -5;
+					left = true;
 					break;
 				case SDLK_RIGHT:
-					speedx = 5;
+					right = true;
 					break;
 				case SDLK_UP:
-					speedy = -5;
+					up = true;
 					break;
 				case SDLK_DOWN:
-					speedy = 5;
+					down = true;
 					break;
+
 				case SDLK_ESCAPE:
 					isRunning = false;
 					break;
 				case SDLK_SPACE:
 					space = true;
-					speed = 30;
+					speed = 20;
 					break;
 				}
 			}
 			if (event.type == SDL_KEYUP) {
 				switch (event.key.keysym.sym) {
 				case SDLK_LEFT:
+					left = false;
 					if (speedx < 0) {
 						speedx = 0;	}
 					break;
 
 				case SDLK_RIGHT:
+					right = false;
 					if (speedx > 0) {
 						speedx = 0;	}
 					break;
 
 				case SDLK_UP:
+					up = false;
 					if (speedy < 0) {
 						speedy = 0;	}
 					break;
 
 				case SDLK_DOWN:
+					down = false;
 					if (speedy > 0) {
 						speedy = 0; }
 					break;
 				}
 			}
 		}
+		if (left == true && right == true) {
+			speedx = 0;
+		}
+		else if (left == true) {
+			speedx = -5;
+		}
+		else if (right == true) {
+			speedx = 5;
+		}
+		if (up== true && down == true){
+			speedy = 0;
+		}
+		else if (up == true) {
+			speedy = -5;
+		}
+		else if (down == true) {
+			speedy = 5;
+		}
+
 		if (ship.x + speedx < 0 ){
 			ship.x = width;
 			if (space == false) {
@@ -81,8 +105,6 @@ int main(int argc, char* argv[]) {
 				shot.x = 30;
 			}
 		}
-		ship.x += speedx;
-
 		if (ship.y + speedy < 0) {
 			ship.y = height;
 			if (space == false) {
@@ -95,12 +117,12 @@ int main(int argc, char* argv[]) {
 				shot.y = 20;
 			}
 		}
+		ship.x += speedx;
 		ship.y += speedy;
 		if (space == false) {
 			shot.x = ship.x + 30;
 			shot.y = ship.y + 20;
 		}
-		
 		else if (space == true) {
 			if (shot.x + speed < width + 20) {
 				shot.x += speed;
@@ -126,30 +148,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-//
-//keystate = SDL_GetKeyState(NULL);
-//if (keystate[SDLK_LEFT]) {
-//	rcSprite.x -= 2;
-//}
-//if (keystate[SDLK_RIGHT]) {
-//	rcSprite.x += 2;
-//}
-//if (keystate[SDLK_UP]) {
-//	rcSprite.y -= 2;
-//}
-//if (keystate[SDLK_DOWN]) {
-//	rcSprite.y += 2;
-//}
-///* collide with edges of screen */
-//if (rcSprite.x < 0) {
-//	rcSprite.x = 0;
-//}
-//else if (rcSprite.x > SCREEN_WIDTH - SPRITE_SIZE) {
-//	rcSprite.x = SCREEN_WIDTH - SPRITE_SIZE;
-//}
-//if (rcSprite.y < 0) {
-//	rcSprite.y = 0;
-//}
-//else if (rcSprite.y > SCREEN_HEIGHT - SPRITE_SIZE) {
-//	rcSprite.y = SCREEN_HEIGHT - SPRITE_SIZE;
-//}
