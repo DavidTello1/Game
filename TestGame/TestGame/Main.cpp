@@ -10,7 +10,9 @@ int main(int argc, char* argv[]) {
 	SDL_Window *window = SDL_CreateWindow("SDL2TEST", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_Rect ship = { 200, 300, 50, 50 };
-	int speedx = 0, speedy = 0;
+	SDL_Rect shot = { ship.x + 30, ship.y + 20, 20, 10 };
+	int speedx = 0, speedy = 0, speed = 0, count = 0;
+	bool space = false;
 
 	bool isRunning = true;
 	SDL_Event event;
@@ -34,9 +36,14 @@ int main(int argc, char* argv[]) {
 				case SDLK_DOWN:
 					speedy = 5;
 					break;
-				
+				case SDLK_ESCAPE:
+					isRunning = false;
+					break;
 				case SDLK_SPACE:
-					;
+					space = true;
+					count += 1;
+					speed = 30;
+					break;
 				}
 			}
 			if (event.type == SDL_KEYUP) {
@@ -64,22 +71,55 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		if (ship.x + speedx < 0 ){
-			ship.x = 0;
+			ship.x = width;
+			if (space == false) {
+				shot.x = width + 30;
+			}
 		}
 		else if (ship.x + speedx > width) {
-			ship.x = width - 50;
+			ship.x = 0;
+			if (space == false) {
+				shot.x = 30;
+			}
 		}
 		ship.x += speedx;
+		if (space == false) {
+			shot.x = ship.x + 30;
+		}
+
 		if (ship.y + speedy < 0) {
-			ship.y = 0;
+			ship.y = height;
+			if (space == false) {
+				shot.y = height + 20;
+			}
 		}
 		else if (ship.y + speedy > height) {
-			ship.y = height - 50;
+			ship.y = 0;
+			if (space == false) {
+				shot.y = 20;
+			}
 		}
 		ship.y += speedy;
+		if (space == false) {
+			shot.y = ship.y + 20;
+		}
+		
+		if (space == true) {
+			if (shot.x + speed < width + 20) {
+				shot.x += speed;
+			}
+			else { 
+				space = false; 
+			}
+		}
 
+		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 		SDL_RenderClear(renderer);
+		for (int i = 0; i < count; ++i) {
+			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+			SDL_RenderFillRect(renderer, &shot);
+		}
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(renderer, &ship);
 		SDL_RenderPresent(renderer);
