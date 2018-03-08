@@ -14,12 +14,12 @@ int main(int argc, char* argv[]) {
 	SDL_Rect ship = { 200, 300, 50, 50 };
 	SDL_Rect shot = { ship.x + 30, ship.y + 20, 20, 10 };
 
-	SDL_Texture *Background = IMG_LoadTexture(renderer, "Images/background.png");
-	SDL_Surface *image = IMG_Load("Images/ship.png");
-
-	/*SDL_Surface *Background = IMG_Load("background.png");
-	SDL_Surface *image = IMG_Load("Images/ship.png");
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, Background);*/
+	SDL_Surface *Background = IMG_Load("Images/background.png");
+	SDL_Texture *BgTexture = SDL_CreateTextureFromSurface(renderer, Background);
+	SDL_Surface *Image = IMG_Load("Images/ship.png");
+	SDL_Texture *ImgTexture = SDL_CreateTextureFromSurface(renderer, Image);
+	SDL_Surface *Laser = IMG_Load("Images/shot.png");
+	SDL_Texture *ShotTexture = SDL_CreateTextureFromSurface(renderer, Laser);
 
 
 	int speedx = 0, speedy = 0, speed = 0;
@@ -148,19 +148,19 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		
-		//SDL_RenderCopy(renderer, Background, NULL, NULL);
-		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 		SDL_RenderClear(renderer);
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-		SDL_RenderFillRect(renderer, &shot);
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		SDL_RenderFillRect(renderer, &ship);
+		SDL_RenderCopy(renderer, BgTexture, NULL, NULL);
+		SDL_RenderCopy(renderer, ImgTexture, NULL, &ship);
+		SDL_RenderCopy(renderer, ShotTexture, NULL, &shot);
 		SDL_RenderPresent(renderer);
 	}
 	
-	//SDL_DestroyTexture(Background);
-	//SDL_FreeSurface(image);
+	SDL_DestroyTexture(BgTexture);
+	SDL_FreeSurface(Background);
+	SDL_DestroyTexture(ImgTexture);
+	SDL_FreeSurface(Image);
+	SDL_DestroyTexture(ShotTexture);
+	SDL_FreeSurface(Laser);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	IMG_Quit();
