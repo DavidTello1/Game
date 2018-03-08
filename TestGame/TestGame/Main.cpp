@@ -2,7 +2,6 @@
 #include "SDL_Image/include/SDL_image.h"
 #pragma comment(lib, "SDL/libx86/SDL2.lib")
 #pragma comment(lib, "SDL/libx86/SDL2main.lib")
-#pragma comment(lib, "SDL_Image/libx86/SDL2_image.lib")
 
 #define width 1200
 #define height 600
@@ -12,14 +11,17 @@ int main(int argc, char* argv[]) {
 	IMG_Init(IMG_INIT_PNG);
 	SDL_Window *window = SDL_CreateWindow("SDL2TEST", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	SDL_Surface *gScreenSurface = SDL_GetWindowSurface(window);
-	SDL_Surface *Background = IMG_Load("coolbackground.png");
-	SDL_Surface *OptimizedSurface = NULL;
-	SDL_Surface *image = IMG_Load("coolimage.png");
-	SDL_Surface *OptimizedSurface = SDL_ConvertSurface(Background, gScreenSurface->format, NULL);
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
 	SDL_Rect ship = { 200, 300, 50, 50 };
 	SDL_Rect shot = { ship.x + 30, ship.y + 20, 20, 10 };
+
+	SDL_Texture *Background = IMG_LoadTexture(renderer, "Images/background.png");
+	SDL_Surface *image = IMG_Load("Images/ship.png");
+
+	/*SDL_Surface *Background = IMG_Load("background.png");
+	SDL_Surface *image = IMG_Load("Images/ship.png");
+	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, Background);*/
+
+
 	int speedx = 0, speedy = 0, speed = 0;
 	bool left = false, right = false, up = false, down = false, space = false;
 
@@ -147,9 +149,9 @@ int main(int argc, char* argv[]) {
 		}
 
 		
-		/*SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-		SDL_RenderClear(renderer);*/
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		//SDL_RenderCopy(renderer, Background, NULL, NULL);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		SDL_RenderClear(renderer);
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &shot);
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -157,8 +159,8 @@ int main(int argc, char* argv[]) {
 		SDL_RenderPresent(renderer);
 	}
 	
-	SDL_DestroyTexture(texture);
-	SDL_FreeSurface(image);
+	//SDL_DestroyTexture(Background);
+	//SDL_FreeSurface(image);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	IMG_Quit();
