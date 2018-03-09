@@ -73,9 +73,18 @@
     <IncludePath>C:\Users\DavidT\Documents\GitHub\Game\TestGame\TestGame\SDL_Image\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\DavidT\Documents\GitHub\Game\TestGame\TestGame\SDL_Image\libx86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+<<<<<<< HEAD
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\DavidT\Documents\GitHub\Game\TestGame\TestGame\SDL\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\DavidT\Documents\GitHub\Game\TestGame\TestGame\SDL\libx86;$(LibraryPath)</LibraryPath>
+=======
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\davidtp1\Documents\GitHub\Game\TestGame\TestGame\SDL_Image\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\davidtp1\Documents\GitHub\Game\TestGame\TestGame\SDL_Image\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\davidtp1\Documents\GitHub\Game\TestGame\TestGame\SDL_Image\libx86;$(LibraryPath)</LibraryPath>
+>>>>>>> 6bf9e4f64014b52f24c31e0fc9c3d225e87f7b55
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
