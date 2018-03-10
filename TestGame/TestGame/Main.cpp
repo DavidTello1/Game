@@ -1,170 +1,224 @@
-#include "SDL/include/SDL.h"
-#include "SDL_Image/include/SDL_image.h"
-#pragma comment(lib, "SDL/libx86/SDL2.lib")
-#pragma comment(lib, "SDL/libx86/SDL2main.lib")
+#include "SDL\include\SDL.h"
+#include "SDL_image\include\SDL_image.h"
+//#include "SDL_mixer\include\SDL_mixer.h"
 
-#define width 1200
-#define height 600
+#pragma comment( lib, "SDL/libx86/SDL2.lib" )
+#pragma comment( lib, "SDL/libx86/SDL2main.lib" )
+#pragma comment( lib, "SDL_image/libx86/SDL2_image.lib" )
+//#pragma comment( lib, "SDL_mixer/libx86/SDL2_mixer.lib" )
 
-int main(int argc, char* argv[]) {
-	SDL_Init(SDL_INIT_VIDEO);
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+#define SHIP_SPEED 3
+#define NUM_SHOTS 3
+#define SHOT_SPEED 7
+#define SHIP_WIDTH 134
+#define SHIP_HEIGHT 64
+
+struct projectile
+{
+	int x, y;
+	bool alive;
+};
+
+struct globals
+{
+	SDL_Window* window = nullptr;
+	SDL_Renderer* renderer = nullptr;
+	SDL_Texture* background = nullptr;
+	SDL_Texture* ship = nullptr;
+	SDL_Texture* shot = nullptr;
+	SDL_Texture* special = nullptr;
+	int SCROLL_SPEED = 2;
+	int background_width = 0;
+	int ship_x = 0;
+	int ship_y = 0;
+	int last_shot = 0;
+	bool fire, up, down, left, right, specialshot, supershot;
+	//Mix_Music* music = nullptr;
+	//Mix_Chunk* fx_shoot = nullptr;
+	int scroll = 0;
+	projectile shots[NUM_SHOTS];
+	projectile super;
+} g;
+
+void Start()
+{
+	SDL_Init(SDL_INIT_EVERYTHING);
+
+	g.window = SDL_CreateWindow("Mini Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+	g.renderer = SDL_CreateRenderer(g.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
 	IMG_Init(IMG_INIT_PNG);
-	SDL_Window *window = SDL_CreateWindow("SDL2TEST", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	SDL_Rect ship = { 200, 300, 50, 50 };
-	SDL_Rect shot = { ship.x + 30, ship.y + 20, 20, 10 };
+	g.background = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/background.png"));
+	g.ship = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship.png"));
+	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/shot.png"));
+	g.special = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/special.png"));
+	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
-	SDL_Surface *Background = IMG_Load("Images/background.png");
-	SDL_Texture *BgTexture = SDL_CreateTextureFromSurface(renderer, Background);
-	SDL_Surface *Image = IMG_Load("Images/ship.png");
-	SDL_Texture *ImgTexture = SDL_CreateTextureFromSurface(renderer, Image);
-	SDL_Surface *Laser = IMG_Load("Images/shot.png");
-	SDL_Texture *ShotTexture = SDL_CreateTextureFromSurface(renderer, Laser);
+	/*Mix_Init(MIX_INIT_OGG);
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+	g.music = Mix_LoadMUS("assets/music.ogg");
+	Mix_PlayMusic(g.music, -1);
+	g.fx_shoot = Mix_LoadWAV("assets/laser.wav");*/
 
+	g.ship_x = 100;
+	g.ship_y = SCREEN_HEIGHT / 2;
+	g.fire = g.up = g.down = g.left = g.right = g.specialshot = g.supershot = false;
+}
 
-	int speedx = 0, speedy = 0, speed = 0;
-	bool left = false, right = false, up = false, down = false, space = false;
+void Finish()
+{
+	/*Mix_FreeMusic(g.music);
+	Mix_FreeChunk(g.fx_shoot);
+	Mix_CloseAudio();
+	Mix_Quit();*/
+	SDL_DestroyTexture(g.shot);
+	SDL_DestroyTexture(g.ship);
+	SDL_DestroyTexture(g.background);
+	SDL_DestroyTexture(g.special);
+	IMG_Quit();
+	SDL_DestroyRenderer(g.renderer);
+	SDL_DestroyWindow(g.window);
+	SDL_Quit();
+}
 
-	bool isRunning = true;
+bool CheckInput()
+{
+	bool ret = true;
 	SDL_Event event;
 
-	while (isRunning) {
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
-				isRunning = false;
-			}
-			else if (event.type == SDL_KEYDOWN) {
-				switch (event.key.keysym.sym) {
-				case SDLK_LEFT:
-					left = true;
-					break;
-				case SDLK_RIGHT:
-					right = true;
-					break;
-				case SDLK_UP:
-					up = true;
-					break;
-				case SDLK_DOWN:
-					down = true;
-					break;
-
-				case SDLK_ESCAPE:
-					isRunning = false;
-					break;
-				case SDLK_SPACE:
-					space = true;
-					speed = 20;
-					break;
-				}
-			}
-			if (event.type == SDL_KEYUP) {
-				switch (event.key.keysym.sym) {
-				case SDLK_LEFT:
-					left = false;
-					if (speedx < 0) {
-						speedx = 0;
-					}
-					break;
-
-				case SDLK_RIGHT:
-					right = false;
-					if (speedx > 0) {
-						speedx = 0;
-					}
-					break;
-
-				case SDLK_UP:
-					up = false;
-					if (speedy < 0) {
-						speedy = 0;
-					}
-					break;
-
-				case SDLK_DOWN:
-					down = false;
-					if (speedy > 0) {
-						speedy = 0;
-					}
-					break;
-				}
+	while (SDL_PollEvent(&event) != 0)
+	{
+		if (event.type == SDL_KEYUP)
+		{
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_UP: g.up = false;	break;
+			case SDLK_DOWN:	g.down = false;	break;
+			case SDLK_LEFT:	g.left = false;	break;
+			case SDLK_RIGHT: g.right = false; break;
 			}
 		}
-
-		if (left == true && right == true) {
-			speedx = 0;
-		}
-		else if (left == true) {
-			speedx = -5;
-		}
-		else if (right == true) {
-			speedx = 5;
-		}
-		if (up== true && down == true){
-			speedy = 0;
-		}
-		else if (up == true) {
-			speedy = -5;
-		}
-		else if (down == true) {
-			speedy = 5;
-		}
-
-		if (ship.x + speedx < 0 ){
-			ship.x = width;
-			if (space == false) {
-				shot.x = width + 30;
+		else if (event.type == SDL_KEYDOWN)
+		{
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_UP: g.up = true; break;
+			case SDLK_DOWN: g.down = true; break;
+			case SDLK_LEFT: g.left = true; break;
+			case SDLK_RIGHT: g.right = true; break;
+			case SDLK_ESCAPE: ret = false; break;
+			case SDLK_SPACE: if (g.specialshot == false) g.fire = (event.key.repeat == 0); break;
+			case SDLK_LALT: g.specialshot = (event.key.repeat == 0); break;
 			}
 		}
-		else if (ship.x + speedx > width) {
-			ship.x = 0;
-			if (space == false) {
-				shot.x = 30;
-			}
-		}
-		if (ship.y + speedy < 0) {
-			ship.y = height;
-			if (space == false) {
-				shot.y = height + 20;
-			}
-		}
-		else if (ship.y + speedy > height) {
-			ship.y = 0;
-			if (space == false) {
-				shot.y = 20;
-			}
-		}
-		ship.x += speedx;
-		ship.y += speedy;
-		if (space == false) {
-			shot.x = ship.x + 30;
-			shot.y = ship.y + 20;
-		}
-		else if (space == true) {
-			if (shot.x + speed < width + 20) {
-				shot.x += speed;
-			}
-			else { 
-				space = false; 
-			}
-		}
-
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, BgTexture, NULL, NULL);
-		SDL_RenderCopy(renderer, ImgTexture, NULL, &ship);
-		SDL_RenderCopy(renderer, ShotTexture, NULL, &shot);
-		SDL_RenderPresent(renderer);
+		else if (event.type == SDL_QUIT)
+			ret = false;
 	}
-	
-	SDL_DestroyTexture(BgTexture);
-	SDL_FreeSurface(Background);
-	SDL_DestroyTexture(ImgTexture);
-	SDL_FreeSurface(Image);
-	SDL_DestroyTexture(ShotTexture);
-	SDL_FreeSurface(Laser);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	IMG_Quit();
-	SDL_Quit();
+	return ret;
+}
 
-	return 0;
+void MoveStuff()
+{
+	if (g.up && g.ship_y - SHIP_SPEED > 0) g.ship_y -= SHIP_SPEED;
+	if (g.down && g.ship_y + SHIP_SPEED < SCREEN_HEIGHT - SHIP_HEIGHT) g.ship_y += SHIP_SPEED;
+	if (g.left && g.ship_x - SHIP_SPEED > 0) g.ship_x -= SHIP_SPEED;
+	if (g.right && g.ship_x + SHIP_SPEED < SCREEN_WIDTH - SHIP_WIDTH)	g.ship_x += SHIP_SPEED;
+
+	if (g.fire)
+	{
+		//Mix_PlayChannel(-1, g.fx_shoot, 0);
+		g.fire = false;
+
+		if (g.last_shot >= NUM_SHOTS)
+		{
+			for (int i = 0; i < NUM_SHOTS; ++i) {
+				if (g.shots[i].alive == false)
+					g.last_shot = 0;
+			}
+		}
+		g.shots[g.last_shot].alive = true;
+		g.shots[g.last_shot].x = g.ship_x + SHIP_WIDTH / 2;
+		g.shots[g.last_shot].y = g.ship_y + SHIP_HEIGHT - 20;
+		++g.last_shot;
+	}
+
+	for (int i = 0; i < NUM_SHOTS; ++i)
+	{
+		if (g.shots[i].alive)
+		{
+			if (g.shots[i].x < SCREEN_WIDTH)
+				g.shots[i].x += SHOT_SPEED;
+			else
+				g.shots[i].alive = false;
+		}
+	}
+
+	if (g.specialshot)
+	{
+		//Mix_PlayChannel(-1, g.fx_shoot, 0);
+		g.specialshot = false;
+
+		if (g.super.alive == false) {
+			g.super.alive = true;
+			g.super.x = g.ship_x + SHIP_WIDTH / 2;
+			g.super.y = g.ship_y + SHIP_HEIGHT - 64;
+		}
+	}
+	if (g.super.alive)
+	{
+		if (g.super.x < SCREEN_WIDTH)
+			g.super.x += SHOT_SPEED;
+		else
+			g.super.alive = false;
+	}
+}
+
+void Draw()
+{
+	SDL_Rect target;
+
+	g.scroll += g.SCROLL_SPEED;
+	if (g.scroll >= g.background_width)
+		g.scroll = 0;
+
+	target = { -g.scroll, 0, g.background_width, SCREEN_HEIGHT };
+
+	SDL_RenderCopy(g.renderer, g.background, nullptr, &target);
+	target.x += g.background_width;
+	SDL_RenderCopy(g.renderer, g.background, nullptr, &target);
+
+	target = { g.ship_x, g.ship_y, SHIP_WIDTH, SHIP_HEIGHT };
+	SDL_RenderCopy(g.renderer, g.ship, nullptr, &target);
+
+	for (int i = 0; i < NUM_SHOTS; ++i)
+	{
+		if (g.shots[i].alive)
+		{
+			target = { g.shots[i].x, g.shots[i].y, 40, 40 };
+			SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
+		}
+	}
+	if (g.super.alive) {
+		target = { g.super.x, g.super.y, 64, 64 };
+		SDL_RenderCopy(g.renderer, g.special, nullptr, &target);
+	}
+
+	SDL_RenderPresent(g.renderer);
+}
+
+int main(int argc, char* args[])
+{
+	Start();
+
+	while (CheckInput())
+	{
+		MoveStuff();
+		Draw();
+	}
+
+	Finish();
+
+	return(0);
 }
