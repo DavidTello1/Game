@@ -12,7 +12,7 @@
 #define SHIP_SPEED 4
 #define NUM_SHOTS 3
 #define SHOT_SPEED 7
-#define SHIP_WIDTH 134
+#define SHIP_WIDTH 128
 #define SHIP_HEIGHT 64
 #define NUM_ROCKS 10
 
