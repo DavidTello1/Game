@@ -38,6 +38,7 @@ struct globals
 	SDL_Texture* shot = nullptr;
 	SDL_Texture* special = nullptr;
 	int SCROLL_SPEED = 2;
+	int SCORE = 0;
 	int background_width = 0;
 	int ship_x = 0;
 	int ship_y = 0;
