@@ -9,16 +9,24 @@
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
-#define SHIP_SPEED 3
+#define SHIP_SPEED 4
 #define NUM_SHOTS 3
 #define SHOT_SPEED 7
 #define SHIP_WIDTH 134
 #define SHIP_HEIGHT 64
+#define NUM_ROCKS 10
 
 struct projectile
 {
 	int x, y;
 	bool alive;
+};
+
+struct meteorite 
+{
+	int x, y, speed, size, path, movement;
+	bool alive;
+	bool destroyable;
 };
 
 struct globals
@@ -40,6 +48,7 @@ struct globals
 	int scroll = 0;
 	projectile shots[NUM_SHOTS];
 	projectile super;
+	meteorite rocks[NUM_ROCKS];
 } g;
 
 void Start()
@@ -62,8 +71,8 @@ void Start()
 	Mix_PlayMusic(g.music, -1);
 	g.fx_shoot = Mix_LoadWAV("Assets/laser.wav");*/
 
-	g.ship_x = 100;
-	g.ship_y = SCREEN_HEIGHT / 2;
+	g.ship_x = 20;
+	g.ship_y = SCREEN_HEIGHT / 2 - SHIP_HEIGHT / 2;
 	g.fire = g.up = g.down = g.left = g.right = g.supershot = false;
 }
 
@@ -176,6 +185,8 @@ void MoveStuff()
 		else
 			g.super.alive = false;
 	}
+
+
 }
 
 void Draw()
