@@ -34,7 +34,7 @@ struct globals
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
-	bool fire, up, down, left, right, specialshot, supershot;
+	bool fire, up, down, left, right, supershot;
 	//Mix_Music* music = nullptr;
 	//Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -58,13 +58,13 @@ void Start()
 
 	/*Mix_Init(MIX_INIT_OGG);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
-	g.music = Mix_LoadMUS("assets/music.ogg");
+	g.music = Mix_LoadMUS("Assets/music.ogg");
 	Mix_PlayMusic(g.music, -1);
-	g.fx_shoot = Mix_LoadWAV("assets/laser.wav");*/
+	g.fx_shoot = Mix_LoadWAV("Assets/laser.wav");*/
 
 	g.ship_x = 100;
 	g.ship_y = SCREEN_HEIGHT / 2;
-	g.fire = g.up = g.down = g.left = g.right = g.specialshot = g.supershot = false;
+	g.fire = g.up = g.down = g.left = g.right = g.supershot = false;
 }
 
 void Finish()
@@ -109,8 +109,8 @@ bool CheckInput()
 			case SDLK_LEFT: g.left = true; break;
 			case SDLK_RIGHT: g.right = true; break;
 			case SDLK_ESCAPE: ret = false; break;
-			case SDLK_SPACE: if (g.specialshot == false) g.fire = (event.key.repeat == 0); break;
-			case SDLK_LALT: g.specialshot = (event.key.repeat == 0); break;
+			case SDLK_SPACE: g.fire = (event.key.repeat == 0); break;
+			case SDLK_LALT: g.supershot = true; break;
 			}
 		}
 		else if (event.type == SDL_QUIT)
@@ -130,18 +130,21 @@ void MoveStuff()
 	{
 		//Mix_PlayChannel(-1, g.fx_shoot, 0);
 		g.fire = false;
-
-		if (g.last_shot >= NUM_SHOTS)
+		if (g.super.alive == false) 
 		{
-			for (int i = 0; i < NUM_SHOTS; ++i) {
-				if (g.shots[i].alive == false)
-					g.last_shot = 0;
+			if (g.last_shot > NUM_SHOTS) 
+			{
+				for (int i = 0; i < NUM_SHOTS; ++i) {
+					if (g.shots[i].alive == false)
+						g.last_shot = 0;
+				}
 			}
+			g.shots[g.last_shot].alive = true;
+			g.shots[g.last_shot].x = g.ship_x + SHIP_WIDTH / 2;
+			g.shots[g.last_shot].y = g.ship_y + SHIP_HEIGHT - 20;
+			g.last_shot++;
+			g.super.alive = false;
 		}
-		g.shots[g.last_shot].alive = true;
-		g.shots[g.last_shot].x = g.ship_x + SHIP_WIDTH / 2;
-		g.shots[g.last_shot].y = g.ship_y + SHIP_HEIGHT - 20;
-		++g.last_shot;
 	}
 
 	for (int i = 0; i < NUM_SHOTS; ++i)
@@ -155,10 +158,10 @@ void MoveStuff()
 		}
 	}
 
-	if (g.specialshot)
+	if (g.supershot)
 	{
 		//Mix_PlayChannel(-1, g.fx_shoot, 0);
-		g.specialshot = false;
+		g.supershot = false;
 
 		if (g.super.alive == false) {
 			g.super.alive = true;
