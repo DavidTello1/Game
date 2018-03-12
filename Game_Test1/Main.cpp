@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <time.h>
+
 #include "SDL\include\SDL.h"
 #include "SDL_image\include\SDL_image.h"
 //#include "SDL_mixer\include\SDL_mixer.h"
@@ -24,7 +27,7 @@ struct projectile
 
 struct meteorite 
 {
-	int x, y, width, height, speed, path, movement, color; // 0: grey, 1: red, 2: brown;
+	int x, y, width, height, speed, /*movement,*/ color;
 	bool alive;
 };
 
@@ -72,9 +75,9 @@ void Start()
 	g.ship = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship.png"));
 	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/shot.png"));
 	g.special = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/special.png"));
-	g.asteroid_brown = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_brown.png"));
-	g.asteroid_red = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_red.png"));
-	g.asteroid_grey = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_grey.png"));
+	g.asteroid_brown = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_brown.PNG"));
+	g.asteroid_red = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_red.PNG"));
+	g.asteroid_grey = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_grey.PNG"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	/*Mix_Init(MIX_INIT_OGG);
@@ -145,11 +148,45 @@ bool CheckInput()
 
 void MoveStuff()
 {
-	//srand(time(NULL));
+	srand(time(NULL));
+	for (int i = 0; i < NUM_ROCKS; ++i) {
+		if (g.rocks[i].alive == false) {
+			g.rocks[i].alive = true;
 
+			g.rocks[i].width = rand() % 3;
+			if (g.rocks[i].width == 0) {
+				g.rocks[i].width = 32;
+				g.rocks[i].height = 32;
+			}
+			else if (g.rocks[i].width == 1) {
+				g.rocks[i].width = 48;
+				g.rocks[i].height = 48;
+			}
+			else if (g.rocks[i].width == 2) {
+				g.rocks[i].width = 64;
+				g.rocks[i].height = 64;
+			}
 
+			g.rocks[i].speed = (rand() % 5) + 1;
+			g.rocks[i].x = SCREEN_WIDTH;
+			g.rocks[i].y = g.rocks[i].width * (rand() % 10);
+			g.rocks[i].color = rand() % 3;
+		}
+	}
+	for (int i = 0; i < NUM_ROCKS; ++i)
+	{
+		if (g.rocks[i].alive)
+		{
+			if (g.rocks[i].x > 0)
+				g.rocks[i].x -= g.rocks[i].speed;
+			else
+				g.rocks[i].alive = false;
+		}
+	}
+	
 
 	//-------------------------
+
 	if (g.up && g.ship_y - SHIP_SPEED > 0) g.ship_y -= SHIP_SPEED;
 	if (g.down && g.ship_y + SHIP_SPEED < SCREEN_HEIGHT - SHIP_HEIGHT) g.ship_y += SHIP_SPEED;
 	if (g.left && g.ship_x - SHIP_SPEED > 0) g.ship_x -= SHIP_SPEED;
@@ -205,8 +242,6 @@ void MoveStuff()
 		else
 			g.super.alive = false;
 	}
-
-
 }
 
 void Draw()
