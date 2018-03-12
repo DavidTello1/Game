@@ -145,6 +145,11 @@ bool CheckInput()
 
 void MoveStuff()
 {
+	//srand(time(NULL));
+
+
+
+	//-------------------------
 	if (g.up && g.ship_y - SHIP_SPEED > 0) g.ship_y -= SHIP_SPEED;
 	if (g.down && g.ship_y + SHIP_SPEED < SCREEN_HEIGHT - SHIP_HEIGHT) g.ship_y += SHIP_SPEED;
 	if (g.left && g.ship_x - SHIP_SPEED > 0) g.ship_x -= SHIP_SPEED;
@@ -242,17 +247,17 @@ void Draw()
 		{
 			if (g.rocks[i].color == g.grey)
 			{
-				target = { g.rocks[i].x, g.rocks[i].y, g.rocks.width, g.rocks.height };
+				target = { g.rocks[i].x, g.rocks[i].y, g.rocks[i].width, g.rocks[i].height };
 				SDL_RenderCopy(g.renderer, g.asteroid_grey, nullptr, &target);
 			}
 			else if (g.rocks[i].color == g.red) 
 			{
-				target = { g.rocks[i].x, g.rocks[i].y, g.rocks.width, g.rocks.height };
+				target = { g.rocks[i].x, g.rocks[i].y, g.rocks[i].width, g.rocks[i].height };
 				SDL_RenderCopy(g.renderer, g.asteroid_red, nullptr, &target);
 			}
 			else if (g.rocks[i].color == g.brown)
 			{
-				target = { g.rocks[i].x, g.rocks[i].y, g.rocks.width, g.rocks.height };
+				target = { g.rocks[i].x, g.rocks[i].y, g.rocks[i].width, g.rocks[i].height };
 				SDL_RenderCopy(g.renderer, g.asteroid_brown, nullptr, &target);
 			}
 		}
