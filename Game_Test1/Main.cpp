@@ -24,9 +24,14 @@ struct projectile
 
 struct meteorite 
 {
-	int x, y, speed, size, path, movement;
+	int x, y, width, height, speed, path, movement, color;
 	bool alive;
-	bool destroyable;
+};
+
+struct star
+{
+	int x, y, width, height, speed, path, color;
+	bool alive;
 };
 
 struct globals
@@ -37,6 +42,9 @@ struct globals
 	SDL_Texture* ship = nullptr;
 	SDL_Texture* shot = nullptr;
 	SDL_Texture* special = nullptr;
+	SDL_Texture* asteroid_red = nullptr;
+	SDL_Texture* asteroid_brown = nullptr;
+	SDL_Texture* asteroid_grey = nullptr;
 	int SCROLL_SPEED = 2;
 	int SCORE = 0;
 	int background_width = 0;
@@ -64,6 +72,9 @@ void Start()
 	g.ship = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship.png"));
 	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/shot.png"));
 	g.special = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/special.png"));
+	g.asteroid_brown = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_brown.png"));
+	g.asteroid_red = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_red.png"));
+	g.asteroid_grey = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_grey.png"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	/*Mix_Init(MIX_INIT_OGG);
@@ -87,6 +98,9 @@ void Finish()
 	SDL_DestroyTexture(g.ship);
 	SDL_DestroyTexture(g.background);
 	SDL_DestroyTexture(g.special);
+	SDL_DestroyTexture(g.asteroid_brown);
+	SDL_DestroyTexture(g.asteroid_red);
+	SDL_DestroyTexture(g.asteroid_grey);
 	IMG_Quit();
 	SDL_DestroyRenderer(g.renderer);
 	SDL_DestroyWindow(g.window);
