@@ -151,7 +151,7 @@ void MoveStuff()
 			}
 			g.shots[g.last_shot].alive = true;
 			g.shots[g.last_shot].x = g.ship_x + SHIP_WIDTH / 2;
-			g.shots[g.last_shot].y = g.ship_y + SHIP_HEIGHT - 20;
+			g.shots[g.last_shot].y = g.ship_y + SHIP_HEIGHT / 2 - 16;
 			g.last_shot++;
 			g.super.alive = false;
 		}
@@ -176,7 +176,7 @@ void MoveStuff()
 		if (g.super.alive == false) {
 			g.super.alive = true;
 			g.super.x = g.ship_x + SHIP_WIDTH / 2;
-			g.super.y = g.ship_y + SHIP_HEIGHT - 64;
+			g.super.y = g.ship_y + SHIP_HEIGHT/ 2 - 24;
 		}
 	}
 	if (g.super.alive)
@@ -211,12 +211,12 @@ void Draw()
 	{
 		if (g.shots[i].alive)
 		{
-			target = { g.shots[i].x, g.shots[i].y, 40, 40 };
+			target = { g.shots[i].x, g.shots[i].y, 32, 32 };
 			SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
 		}
 	}
 	if (g.super.alive) {
-		target = { g.super.x, g.super.y, 64, 64 };
+		target = { g.super.x, g.super.y, 96, 48 };
 		SDL_RenderCopy(g.renderer, g.special, nullptr, &target);
 	}
 
