@@ -27,7 +27,7 @@ struct projectile
 
 struct meteorite 
 {
-	int x, y, width, height, speed, path, /*movement,*/ color;
+	int x, y, width, height, speed, path, /*movement,*/ color, damage;
 	bool alive;
 };
 
@@ -50,11 +50,14 @@ struct globals
 	SDL_Texture* asteroid_grey = nullptr;
 	int SCROLL_SPEED = 2;
 	int SCORE = 0;
+	int ROCKS = NUM_ROCKS;
 	int background_width = 0;
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
-	bool fire, up, down, left, right, supershot, correct_path;
+	int power = 0;
+	int score_flag = 0;
+	bool fire, up, down, left, right, supershot;
 	//Mix_Music* music = nullptr;
 	//Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -89,6 +92,7 @@ void Start()
 	g.ship_x = 20;
 	g.ship_y = SCREEN_HEIGHT / 2 - SHIP_HEIGHT / 2;
 	g.fire = g.up = g.down = g.left = g.right = g.supershot = false;
+	srand(time(NULL));
 }
 
 void Finish()
@@ -137,7 +141,7 @@ bool CheckInput()
 			case SDLK_RIGHT: g.right = true; break;
 			case SDLK_ESCAPE: ret = false; break;
 			case SDLK_SPACE: g.fire = (event.key.repeat == 0); break;
-			case SDLK_LALT: g.supershot = true; break;
+			case SDLK_LALT: if (g.power >= 20) g.supershot = true; break;
 			}
 		}
 		else if (event.type == SDL_QUIT)
@@ -148,8 +152,7 @@ bool CheckInput()
 
 void MoveStuff()
 {
-	srand(time(NULL));
-	for (int i = 0; i < NUM_ROCKS; ++i) {
+	for (int i = 0; i < g.ROCKS; ++i) {
 		if (g.rocks[i].alive == false) {
 			g.rocks[i].alive = true;
 
@@ -174,26 +177,34 @@ void MoveStuff()
 				g.rocks[i].y = g.rocks[i].width * (rand() % 8);
 			}
 
-			if (g.SCORE >= 50 && g.SCORE < 100) {
+			if (g.SCORE >= 100 && g.SCORE < 250 && g.score_flag == 0) {
 				g.rocks[i].speed++;
+				g.ROCKS++;
+				g.score_flag = 1;
 			}
-			else if (g.SCORE >= 100 && g.SCORE < 150) {
+			else if (g.SCORE >= 250 && g.SCORE < 500 && g.score_flag == 1) {
 				g.rocks[i].speed += 2;
+				g.ROCKS += 2;
+				g.score_flag = 2;
 			}
-			else if (g.SCORE >= 150) {
-				++g.rocks[i].speed += 3;
+			else if (g.SCORE >= 500 && g.score_flag == 2) {
+				g.rocks[i].speed += 3;
+				g.ROCKS += 3;
+				g.score_flag = 3;
 			}
 		}
 	}
-	for (int i = 0; i < NUM_ROCKS; ++i)
+	for (int i = 0; i < g.ROCKS; ++i)
 	{
 		if (g.rocks[i].alive)
 		{
-			if (g.rocks[i].x > 0)
+			if (g.rocks[i].x > -g.rocks[i].width) {
 				g.rocks[i].x -= g.rocks[i].speed;
-			else
+			}
+			else {
 				g.rocks[i].alive = false;
 				g.SCORE++;
+			}
 		}
 	}
 	
@@ -230,8 +241,22 @@ void MoveStuff()
 	{
 		if (g.shots[i].alive)
 		{
-			if (g.shots[i].x < SCREEN_WIDTH)
+			if (g.shots[i].x < SCREEN_WIDTH) {
 				g.shots[i].x += SHOT_SPEED;
+				for (int j = 0; j < g.ROCKS; ++j) {
+					if (abs(g.shots[i].x - g.rocks[j].x) < g.rocks[j].width && abs(g.shots[i].y - g.rocks[j].y) < g.rocks[j].height) {
+						if (g.rocks[j].color != 1) {
+							g.rocks[j].alive = false;
+							g.shots[i].alive = false;
+							g.power++;
+							g.SCORE += 5;
+						}
+						else {
+							g.shots[i].alive = false;
+						}
+					}
+				}
+			}
 			else
 				g.shots[i].alive = false;
 		}
@@ -241,6 +266,7 @@ void MoveStuff()
 	{
 		//Mix_PlayChannel(-1, g.fx_shoot, 0);
 		g.supershot = false;
+		g.power -= 20;
 
 		if (g.super.alive == false) {
 			g.super.alive = true;
@@ -250,8 +276,16 @@ void MoveStuff()
 	}
 	if (g.super.alive)
 	{
-		if (g.super.x < SCREEN_WIDTH)
+		if (g.super.x < SCREEN_WIDTH) {
 			g.super.x += SHOT_SPEED;
+			for (int j = 0; j < g.ROCKS; ++j) {
+				if (abs(g.super.x - g.rocks[j].x) < g.rocks[j].width && abs(g.super.y - g.rocks[j].y) < g.rocks[j].height) {
+						g.rocks[j].alive = false;
+						g.SCORE += 5;
+						g.power++;
+				}
+			}
+		}
 		else
 			g.super.alive = false;
 	}
@@ -289,7 +323,7 @@ void Draw()
 		SDL_RenderCopy(g.renderer, g.special, nullptr, &target);
 	}
 
-	for (int i = 0; i < NUM_ROCKS; ++i) 
+	for (int i = 0; i < g.ROCKS; ++i) 
 	{
 		if (g.rocks[i].alive)
 		{
@@ -326,5 +360,5 @@ int main(int argc, char* args[])
 
 	Finish();
 
-	return(0);
+	return(g.SCORE);
 }
