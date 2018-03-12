@@ -17,7 +17,7 @@
 #define SHOT_SPEED 7
 #define SHIP_WIDTH 128
 #define SHIP_HEIGHT 64
-#define NUM_ROCKS 12
+#define NUM_ROCKS 7
 
 struct projectile
 {
@@ -27,7 +27,7 @@ struct projectile
 
 struct meteorite 
 {
-	int x, y, width, height, speed, /*movement,*/ color;
+	int x, y, width, height, speed, path, /*movement,*/ color;
 	bool alive;
 };
 
@@ -54,7 +54,7 @@ struct globals
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
-	bool fire, up, down, left, right, supershot;
+	bool fire, up, down, left, right, supershot, correct_path;
 	//Mix_Music* music = nullptr;
 	//Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -153,24 +153,36 @@ void MoveStuff()
 		if (g.rocks[i].alive == false) {
 			g.rocks[i].alive = true;
 
+			g.rocks[i].color = rand() % 3;
+			g.rocks[i].speed = (rand() % 3) + 3;
+			g.rocks[i].x = SCREEN_WIDTH;
+
 			g.rocks[i].width = rand() % 3;
 			if (g.rocks[i].width == 0) {
 				g.rocks[i].width = 32;
 				g.rocks[i].height = 32;
+				g.rocks[i].y = g.rocks[i].width * (rand() % 16);
 			}
 			else if (g.rocks[i].width == 1) {
 				g.rocks[i].width = 48;
 				g.rocks[i].height = 48;
+				g.rocks[i].y = g.rocks[i].width * (rand() % 11);
 			}
 			else if (g.rocks[i].width == 2) {
 				g.rocks[i].width = 64;
 				g.rocks[i].height = 64;
+				g.rocks[i].y = g.rocks[i].width * (rand() % 8);
 			}
 
-			g.rocks[i].speed = (rand() % 5) + 1;
-			g.rocks[i].x = SCREEN_WIDTH;
-			g.rocks[i].y = g.rocks[i].width * (rand() % 10);
-			g.rocks[i].color = rand() % 3;
+			if (g.SCORE >= 50 && g.SCORE < 100) {
+				g.rocks[i].speed++;
+			}
+			else if (g.SCORE >= 100 && g.SCORE < 150) {
+				g.rocks[i].speed += 2;
+			}
+			else if (g.SCORE >= 150) {
+				++g.rocks[i].speed += 3;
+			}
 		}
 	}
 	for (int i = 0; i < NUM_ROCKS; ++i)
@@ -181,6 +193,7 @@ void MoveStuff()
 				g.rocks[i].x -= g.rocks[i].speed;
 			else
 				g.rocks[i].alive = false;
+				g.SCORE++;
 		}
 	}
 	
