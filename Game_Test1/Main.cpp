@@ -14,7 +14,7 @@
 #define SHOT_SPEED 7
 #define SHIP_WIDTH 128
 #define SHIP_HEIGHT 64
-#define NUM_ROCKS 10
+#define NUM_ROCKS 12
 
 struct projectile
 {
@@ -51,7 +51,7 @@ struct globals
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
-	bool fire, up, down, left, right, supershot;
+	bool fire, up, down, left, right, supershot, grey, brown, red;
 	//Mix_Music* music = nullptr;
 	//Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -85,7 +85,7 @@ void Start()
 
 	g.ship_x = 20;
 	g.ship_y = SCREEN_HEIGHT / 2 - SHIP_HEIGHT / 2;
-	g.fire = g.up = g.down = g.left = g.right = g.supershot = false;
+	g.fire = g.up = g.down = g.left = g.right = g.supershot = g.grey = g.brown = g.red = false;
 }
 
 void Finish()
@@ -229,9 +229,33 @@ void Draw()
 			SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
 		}
 	}
-	if (g.super.alive) {
+
+	if (g.super.alive) 
+	{
 		target = { g.super.x, g.super.y, 96, 48 };
 		SDL_RenderCopy(g.renderer, g.special, nullptr, &target);
+	}
+
+	for (int i = 0; i < NUM_ROCKS; ++i) 
+	{
+		if (g.rocks[i].alive)
+		{
+			if (g.rocks[i].color == g.grey)
+			{
+				target = { g.rocks[i].x, g.rocks[i].y, g.rocks.width, g.rocks.height };
+				SDL_RenderCopy(g.renderer, g.asteroid_grey, nullptr, &target);
+			}
+			else if (g.rocks[i].color == g.red) 
+			{
+				target = { g.rocks[i].x, g.rocks[i].y, g.rocks.width, g.rocks.height };
+				SDL_RenderCopy(g.renderer, g.asteroid_red, nullptr, &target);
+			}
+			else if (g.rocks[i].color == g.brown)
+			{
+				target = { g.rocks[i].x, g.rocks[i].y, g.rocks.width, g.rocks.height };
+				SDL_RenderCopy(g.renderer, g.asteroid_brown, nullptr, &target);
+			}
+		}
 	}
 
 	SDL_RenderPresent(g.renderer);
