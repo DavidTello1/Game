@@ -24,7 +24,7 @@ struct projectile
 
 struct meteorite 
 {
-	int x, y, width, height, speed, path, movement, color;
+	int x, y, width, height, speed, path, movement, color; // 0: grey, 1: red, 2: brown;
 	bool alive;
 };
 
@@ -51,7 +51,7 @@ struct globals
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
-	bool fire, up, down, left, right, supershot, grey, brown, red;
+	bool fire, up, down, left, right, supershot;
 	//Mix_Music* music = nullptr;
 	//Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -85,7 +85,7 @@ void Start()
 
 	g.ship_x = 20;
 	g.ship_y = SCREEN_HEIGHT / 2 - SHIP_HEIGHT / 2;
-	g.fire = g.up = g.down = g.left = g.right = g.supershot = g.grey = g.brown = g.red = false;
+	g.fire = g.up = g.down = g.left = g.right = g.supershot = false;
 }
 
 void Finish()
@@ -245,17 +245,17 @@ void Draw()
 	{
 		if (g.rocks[i].alive)
 		{
-			if (g.rocks[i].color == g.grey)
+			if (g.rocks[i].color == 0)
 			{
 				target = { g.rocks[i].x, g.rocks[i].y, g.rocks[i].width, g.rocks[i].height };
 				SDL_RenderCopy(g.renderer, g.asteroid_grey, nullptr, &target);
 			}
-			else if (g.rocks[i].color == g.red) 
+			else if (g.rocks[i].color == 1) 
 			{
 				target = { g.rocks[i].x, g.rocks[i].y, g.rocks[i].width, g.rocks[i].height };
 				SDL_RenderCopy(g.renderer, g.asteroid_red, nullptr, &target);
 			}
-			else if (g.rocks[i].color == g.brown)
+			else if (g.rocks[i].color == 2)
 			{
 				target = { g.rocks[i].x, g.rocks[i].y, g.rocks[i].width, g.rocks[i].height };
 				SDL_RenderCopy(g.renderer, g.asteroid_brown, nullptr, &target);
