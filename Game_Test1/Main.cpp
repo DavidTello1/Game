@@ -50,6 +50,7 @@ struct globals
 	SDL_Texture* asteroid_grey = nullptr;
 	int SCROLL_SPEED = 2;
 	int SCORE = 0;
+	int life = 100;
 	int ROCKS = NUM_ROCKS;
 	int background_width = 0;
 	int ship_x = 0;
@@ -57,7 +58,7 @@ struct globals
 	int last_shot = 0;
 	int power = 0;
 	int score_flag = 0;
-	bool fire, up, down, left, right, supershot;
+	bool fire, up, down, left, right, supershot, gameover;
 	//Mix_Music* music = nullptr;
 	//Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -91,7 +92,7 @@ void Start()
 
 	g.ship_x = 20;
 	g.ship_y = SCREEN_HEIGHT / 2 - SHIP_HEIGHT / 2;
-	g.fire = g.up = g.down = g.left = g.right = g.supershot = false;
+	g.fire = g.up = g.down = g.left = g.right = g.supershot = g.gameover = false;
 	srand(time(NULL));
 }
 
@@ -146,6 +147,10 @@ bool CheckInput()
 		}
 		else if (event.type == SDL_QUIT)
 			ret = false;
+
+		if (g.gameover == true) {
+			ret = false;
+		}
 	}
 	return ret;
 }
@@ -164,16 +169,19 @@ void MoveStuff()
 			if (g.rocks[i].width == 0) {
 				g.rocks[i].width = 32;
 				g.rocks[i].height = 32;
+				g.rocks[i].damage = 5;
 				g.rocks[i].y = g.rocks[i].width * (rand() % 16);
 			}
 			else if (g.rocks[i].width == 1) {
 				g.rocks[i].width = 48;
 				g.rocks[i].height = 48;
+				g.rocks[i].damage = 10;
 				g.rocks[i].y = g.rocks[i].width * (rand() % 11);
 			}
 			else if (g.rocks[i].width == 2) {
 				g.rocks[i].width = 64;
 				g.rocks[i].height = 64;
+				g.rocks[i].damage = 20;
 				g.rocks[i].y = g.rocks[i].width * (rand() % 8);
 			}
 
@@ -200,6 +208,16 @@ void MoveStuff()
 		{
 			if (g.rocks[i].x > -g.rocks[i].width) {
 				g.rocks[i].x -= g.rocks[i].speed;
+				if (abs(g.ship_x - g.rocks[i].x) < SHIP_WIDTH && abs(g.ship_y - g.rocks[i].y) < SHIP_HEIGHT) {
+					if (g.rocks[i].color == 1) {
+						g.rocks[i].damage *= 2;
+					}
+					g.life-=g.rocks[i].damage;
+					g.rocks[i].alive = false;
+					if (g.life <= 0) {
+						g.gameover = true;
+					}
+				}
 			}
 			else {
 				g.rocks[i].alive = false;
@@ -250,6 +268,17 @@ void MoveStuff()
 							g.shots[i].alive = false;
 							g.power++;
 							g.SCORE += 5;
+							if (g.rocks[j].color == 0) {
+								if (g.rocks[j].height == 32) {
+									g.life++;
+								}
+								else if (g.rocks[j].height == 48) {
+									g.life += 3;
+								}
+								else if (g.rocks[j].height == 64) {
+									g.life += 5;
+								}
+							}
 						}
 						else {
 							g.shots[i].alive = false;
@@ -279,7 +308,7 @@ void MoveStuff()
 		if (g.super.x < SCREEN_WIDTH) {
 			g.super.x += SHOT_SPEED;
 			for (int j = 0; j < g.ROCKS; ++j) {
-				if (abs(g.super.x - g.rocks[j].x) < g.rocks[j].width && abs(g.super.y - g.rocks[j].y) < g.rocks[j].height) {
+				if (abs(g.super.x - g.rocks[j].x) < 96 && abs(g.super.y - g.rocks[j].y) < 48) {
 						g.rocks[j].alive = false;
 						g.SCORE += 5;
 						g.power++;
