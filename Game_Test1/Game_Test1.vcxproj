@@ -70,12 +70,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\DavidT\Documents\GitHub\Game\Game_Test1\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\DavidT\Documents\GitHub\Game\Game_Test1\SDL\libx86;$(LibraryPath)</LibraryPath>
+    <IncludePath>Game_Test1\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>Game_Test1\SDL\libx86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\davidtp1\Documents\GitHub\Game\Game_Test1\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\davidtp1\Documents\GitHub\Game\Game_Test1\SDL\libx86;$(LibraryPath)</LibraryPath>
+    <IncludePath>Game_Test1\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>Game_Test1\SDL\libx86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
