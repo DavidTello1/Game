@@ -104,7 +104,7 @@ void Start()
 	g.ship_x = 20;
 	g.ship_y = SCREEN_HEIGHT / 2 - SHIP_HEIGHT / 2;
 	g.fire = g.up = g.down = g.left = g.right = g.supershot = g.gameover = false;
-	srand(time(NULL));
+	srand(time(0));
 }
 
 void Finish()
