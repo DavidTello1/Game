@@ -51,11 +51,14 @@ struct globals
 	SDL_Texture* asteroid_red = nullptr;
 	SDL_Texture* asteroid_brown = nullptr;
 	SDL_Texture* asteroid_grey = nullptr;
+	SDL_Texture* over = nullptr;
 	int SCROLL_SPEED = 2;
 	int SCORE = 0;
+	int finalscore = 0;
 	int life = 100;
 	int ROCKS = NUM_ROCKS;
 	int background_width = 0;
+	int over_width = 0;
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
@@ -88,7 +91,9 @@ void Start()
 	g.ship_yellow = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship_yellow.PNG"));
 	g.ship_red = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship_red.PNG"));
 	g.charged = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/charged.PNG"));
+	g.over = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/game_over.png"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
+	SDL_QueryTexture(g.over, nullptr, nullptr, &g.over_width, nullptr);
 
 	/*Mix_Init(MIX_INIT_OGG);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
@@ -118,6 +123,7 @@ void Finish()
 	SDL_DestroyTexture(g.ship_yellow);
 	SDL_DestroyTexture(g.ship_red);
 	SDL_DestroyTexture(g.charged);
+	SDL_DestroyTexture(g.over);
 	IMG_Quit();
 	SDL_DestroyRenderer(g.renderer);
 	SDL_DestroyWindow(g.window);
@@ -156,10 +162,6 @@ bool CheckInput()
 		}
 		else if (event.type == SDL_QUIT)
 			ret = false;
-
-		if (g.gameover == true) {
-			ret = false;
-		}
 	}
 	return ret;
 }
@@ -223,8 +225,9 @@ void MoveStuff()
 					}
 					g.life-=g.rocks[i].damage;
 					g.rocks[i].alive = false;
-					if (g.life <= 0) {
+					if (g.life <= 0 && g.gameover == false) {
 						g.gameover = true;
+						g.finalscore = g.SCORE;
 					}
 				}
 			}
@@ -399,6 +402,11 @@ void Draw()
 		SDL_RenderCopy(g.renderer, g.charged, nullptr, &target);
 	}
 
+	if (g.gameover == true) {
+		target = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+		SDL_RenderCopy(g.renderer, g.over, nullptr, &target);
+	}
+
 	SDL_RenderPresent(g.renderer);
 }
 
@@ -414,5 +422,5 @@ int main(int argc, char* args[])
 
 	Finish();
 
-	return(g.SCORE);
+	return(g.finalscore);
 }
