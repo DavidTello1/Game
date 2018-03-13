@@ -13,10 +13,10 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define SHIP_SPEED 4
-#define NUM_SHOTS 3
+#define NUM_SHOTS 5
 #define SHOT_SPEED 7
-#define SHIP_WIDTH 128
-#define SHIP_HEIGHT 64
+#define SHIP_WIDTH 80
+#define SHIP_HEIGHT 48
 #define NUM_ROCKS 7
 
 struct projectile
@@ -43,8 +43,11 @@ struct globals
 	SDL_Renderer* renderer = nullptr;
 	SDL_Texture* background = nullptr;
 	SDL_Texture* ship = nullptr;
+	SDL_Texture* ship_yellow = nullptr;
+	SDL_Texture* ship_red = nullptr;
 	SDL_Texture* shot = nullptr;
 	SDL_Texture* special = nullptr;
+	SDL_Texture* charged = nullptr;
 	SDL_Texture* asteroid_red = nullptr;
 	SDL_Texture* asteroid_brown = nullptr;
 	SDL_Texture* asteroid_grey = nullptr;
@@ -82,6 +85,9 @@ void Start()
 	g.asteroid_brown = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_brown.PNG"));
 	g.asteroid_red = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_red.PNG"));
 	g.asteroid_grey = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/meteorite_grey.PNG"));
+	g.ship_yellow = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship_yellow.PNG"));
+	g.ship_red = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/ship_red.PNG"));
+	g.charged = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("Assets/charged.PNG"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	/*Mix_Init(MIX_INIT_OGG);
@@ -109,6 +115,9 @@ void Finish()
 	SDL_DestroyTexture(g.asteroid_brown);
 	SDL_DestroyTexture(g.asteroid_red);
 	SDL_DestroyTexture(g.asteroid_grey);
+	SDL_DestroyTexture(g.ship_yellow);
+	SDL_DestroyTexture(g.ship_red);
+	SDL_DestroyTexture(g.charged);
 	IMG_Quit();
 	SDL_DestroyRenderer(g.renderer);
 	SDL_DestroyWindow(g.window);
@@ -186,18 +195,18 @@ void MoveStuff()
 			}
 
 			if (g.SCORE >= 100 && g.SCORE < 250 && g.score_flag == 0) {
-				g.rocks[i].speed++;
-				g.ROCKS++;
+				g.rocks[i].speed += 2;
+				g.ROCKS += 2;
 				g.score_flag = 1;
 			}
 			else if (g.SCORE >= 250 && g.SCORE < 500 && g.score_flag == 1) {
-				g.rocks[i].speed += 2;
-				g.ROCKS += 2;
+				g.rocks[i].speed += 3;
+				g.ROCKS += 3;
 				g.score_flag = 2;
 			}
 			else if (g.SCORE >= 500 && g.score_flag == 2) {
-				g.rocks[i].speed += 3;
-				g.ROCKS += 3;
+				g.rocks[i].speed += 4;
+				g.ROCKS += 5;
 				g.score_flag = 3;
 			}
 		}
@@ -266,18 +275,13 @@ void MoveStuff()
 						if (g.rocks[j].color != 1) {
 							g.rocks[j].alive = false;
 							g.shots[i].alive = false;
-							g.power++;
 							g.SCORE += 5;
+							g.power++;
 							if (g.rocks[j].color == 0) {
-								if (g.rocks[j].height == 32) {
-									g.life++;
-								}
-								else if (g.rocks[j].height == 48) {
-									g.life += 3;
-								}
-								else if (g.rocks[j].height == 64) {
-									g.life += 5;
-								}
+									g.power++;
+							}
+							if (g.power > 100) {
+								g.power = 100;
 							}
 						}
 						else {
@@ -307,11 +311,17 @@ void MoveStuff()
 	{
 		if (g.super.x < SCREEN_WIDTH) {
 			g.super.x += SHOT_SPEED;
-			for (int j = 0; j < g.ROCKS; ++j) {
-				if (abs(g.super.x - g.rocks[j].x) < 96 && abs(g.super.y - g.rocks[j].y) < 48) {
-						g.rocks[j].alive = false;
+			for (int i = 0; i < g.ROCKS; ++i) {
+				if (abs(g.super.x - g.rocks[i].x) < 96 && abs(g.super.y - g.rocks[i].y) < 48) {
+						g.rocks[i].alive = false;
 						g.SCORE += 5;
 						g.power++;
+						if (g.rocks[i].color == 0) {
+							g.power++;
+						}
+						if (g.power > 100) {
+							g.power = 100;
+						}
 				}
 			}
 		}
@@ -334,9 +344,19 @@ void Draw()
 	target.x += g.background_width;
 	SDL_RenderCopy(g.renderer, g.background, nullptr, &target);
 
-	target = { g.ship_x, g.ship_y, SHIP_WIDTH, SHIP_HEIGHT };
-	SDL_RenderCopy(g.renderer, g.ship, nullptr, &target);
-
+	if (g.life <= 40) {
+		target = { g.ship_x, g.ship_y, SHIP_WIDTH, SHIP_HEIGHT };
+		SDL_RenderCopy(g.renderer, g.ship_red, nullptr, &target);
+	}
+	else if (g.life > 40 && g.life <= 70) {
+		target = { g.ship_x, g.ship_y, SHIP_WIDTH, SHIP_HEIGHT };
+		SDL_RenderCopy(g.renderer, g.ship_yellow, nullptr, &target);
+	}
+	else {
+		target = { g.ship_x, g.ship_y, SHIP_WIDTH, SHIP_HEIGHT };
+		SDL_RenderCopy(g.renderer, g.ship, nullptr, &target);
+	}
+	
 	for (int i = 0; i < NUM_SHOTS; ++i)
 	{
 		if (g.shots[i].alive)
@@ -372,6 +392,11 @@ void Draw()
 				SDL_RenderCopy(g.renderer, g.asteroid_brown, nullptr, &target);
 			}
 		}
+	}
+
+	for (int i = 0; i < g.power/20; ++i) {
+		target = { 16*i, 0, 16, 16 };
+		SDL_RenderCopy(g.renderer, g.charged, nullptr, &target);
 	}
 
 	SDL_RenderPresent(g.renderer);
