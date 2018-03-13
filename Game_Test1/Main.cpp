@@ -52,6 +52,7 @@ struct globals
 	SDL_Texture* asteroid_brown = nullptr;
 	SDL_Texture* asteroid_grey = nullptr;
 	SDL_Texture* over = nullptr;
+	SDL_Texture* yourScore = nullptr;
 	int SCROLL_SPEED = 2;
 	int SCORE = 0;
 	int finalscore = 0;
@@ -405,6 +406,9 @@ void Draw()
 	if (g.gameover == true) {
 		target = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 		SDL_RenderCopy(g.renderer, g.over, nullptr, &target);
+
+		//target = { SCREEN_WIDTH / 2, SCREEN_HEIGHT + SCREEN_HEIGHT / 3, score_width, score_height };
+		//SDL_RenderCopy(g.renderer, g.over, nullptr, &target);
 	}
 
 	SDL_RenderPresent(g.renderer);
